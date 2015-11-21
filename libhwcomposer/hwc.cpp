@@ -50,22 +50,22 @@ static int hwc_device_open(const struct hw_module_t* module,
                            struct hw_device_t** device);
 
 static struct hw_module_methods_t hwc_module_methods = {
-    open: hwc_device_open
+    .open = hwc_device_open
 };
 
 static void reset_panel(struct hwc_composer_device_1* dev);
 
 hwc_module_t HAL_MODULE_INFO_SYM = {
-    common: {
-        tag: HARDWARE_MODULE_TAG,
-        version_major: 2,
-        version_minor: 0,
-        id: HWC_HARDWARE_MODULE_ID,
-        name: "Qualcomm Hardware Composer Module",
-        author: "CodeAurora Forum",
-        methods: &hwc_module_methods,
-        dso: 0,
-        reserved: {0},
+    .common = {
+        .tag = HARDWARE_MODULE_TAG,
+        .version_major = 2,
+        .version_minor = 0,
+        .id = HWC_HARDWARE_MODULE_ID,
+        .name = "Qualcomm Hardware Composer Module",
+        .author = "CodeAurora Forum",
+        .methods = &hwc_module_methods,
+        .dso = 0,
+        .reserved = {0},
     }
 };
 
@@ -734,7 +734,9 @@ int hwc_getDisplayAttributes(struct hwc_composer_device_1* dev, int disp,
         HWC_DISPLAY_HEIGHT,
         HWC_DISPLAY_DPI_X,
         HWC_DISPLAY_DPI_Y,
+#ifdef GET_DISPLAY_SECURE_STATUS_FROM_HWC
         HWC_DISPLAY_SECURE,
+#endif
         HWC_DISPLAY_NO_ATTRIBUTE,
     };
 
@@ -762,9 +764,11 @@ int hwc_getDisplayAttributes(struct hwc_composer_device_1* dev, int disp,
         case HWC_DISPLAY_DPI_Y:
             values[i] = (int32_t) (ctx->dpyAttr[disp].ydpi*1000.0);
             break;
+#ifdef GET_DISPLAY_SECURE_STATUS_FROM_HWC
         case HWC_DISPLAY_SECURE:
             values[i] = (int32_t) (ctx->dpyAttr[disp].secure);
             break;
+#endif
         default:
             ALOGE("Unknown display attribute %d",
                     attributes[i]);
@@ -815,6 +819,10 @@ static int hwc_device_open(const struct hw_module_t* module, const char* name,
     if (!strcmp(name, HWC_HARDWARE_COMPOSER)) {
         struct hwc_context_t *dev;
         dev = (hwc_context_t*)malloc(sizeof(*dev));
+        if (dev == NULL) {
+            ALOGE("%s: malloc failure!", __FUNCTION__);
+            return status;
+        }
         memset(dev, 0, sizeof(*dev));
 
         //Initialize hwc context

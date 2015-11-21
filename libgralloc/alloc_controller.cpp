@@ -55,7 +55,9 @@
 using namespace gralloc;
 using namespace qdutils;
 
+namespace android {
 ANDROID_SINGLETON_STATIC_INSTANCE(AdrenoMemInfo);
+}
 
 //Common functions
 static bool canFallback(int usage, bool triedSystem)
@@ -111,7 +113,7 @@ int AdrenoMemInfo::getStride(int width, int format)
 {
     int stride = ALIGN(width, 32);
     // Currently surface padding is only computed for RGB* surfaces.
-    if (format <= HAL_PIXEL_FORMAT_sRGB_X_8888) {
+    if (format <= HAL_PIXEL_FORMAT_BGRA_8888) {
         int bpp = 4;
         switch(format)
         {
@@ -137,7 +139,7 @@ int AdrenoMemInfo::getStride(int width, int format)
         switch (format)
         {
             case HAL_PIXEL_FORMAT_YCrCb_420_SP_ADRENO:
-            case HAL_PIXEL_FORMAT_RAW_SENSOR:
+            case HAL_PIXEL_FORMAT_RAW16:
                 stride = ALIGN(width, 32);
                 break;
             case HAL_PIXEL_FORMAT_YCbCr_420_SP_TILED:
@@ -330,15 +332,13 @@ size_t getBufferSizeAndDimensions(int width, int height, int format,
         case HAL_PIXEL_FORMAT_RGBA_8888:
         case HAL_PIXEL_FORMAT_RGBX_8888:
         case HAL_PIXEL_FORMAT_BGRA_8888:
-        case HAL_PIXEL_FORMAT_sRGB_A_8888:
-        case HAL_PIXEL_FORMAT_sRGB_X_8888:
             size = alignedw * alignedh * 4;
             break;
         case HAL_PIXEL_FORMAT_RGB_888:
             size = alignedw * alignedh * 3;
             break;
         case HAL_PIXEL_FORMAT_RGB_565:
-        case HAL_PIXEL_FORMAT_RAW_SENSOR:
+        case HAL_PIXEL_FORMAT_RAW16:
             size = alignedw * alignedh * 2;
             break;
 
@@ -447,7 +447,7 @@ int getYUVPlaneInfo(private_handle_t* hnd, struct android_ycbcr* ycbcr)
         case HAL_PIXEL_FORMAT_YCrCb_422_SP:
         case HAL_PIXEL_FORMAT_YCrCb_420_SP_ADRENO:
         case HAL_PIXEL_FORMAT_NV21_ZSL:
-        case HAL_PIXEL_FORMAT_RAW_SENSOR:
+        case HAL_PIXEL_FORMAT_RAW16:
             ystride = cstride = hnd->width;
             ycbcr->y  = (void*)hnd->base;
             ycbcr->cr = (void*)(hnd->base + ystride * hnd->height);

@@ -45,9 +45,6 @@ gpu_context_t::gpu_context_t(const private_module_t* module,
     common.module  = const_cast<hw_module_t*>(&module->base.common);
     common.close   = gralloc_close;
     alloc          = gralloc_alloc;
-#ifdef QCOM_BSP
-    allocSize      = gralloc_alloc_size;
-#endif
     free           = gralloc_free;
 
 }
@@ -160,7 +157,7 @@ void gpu_context_t::getGrallocInformationFromFormat(int inputFormat,
 {
     *bufferType = BUFFER_TYPE_VIDEO;
 
-    if (inputFormat <= HAL_PIXEL_FORMAT_sRGB_X_8888) {
+    if (inputFormat <= HAL_PIXEL_FORMAT_BGRA_8888) {
         // RGB formats
         *bufferType = BUFFER_TYPE_UI;
     } else if ((inputFormat == HAL_PIXEL_FORMAT_R_8) ||
@@ -266,6 +263,12 @@ int gpu_context_t::alloc_impl(int w, int h, int format, int usage,
         else if(usage & GRALLOC_USAGE_HW_COMPOSER)
             //XXX: If we still haven't set a format, default to RGBA8888
             grallocFormat = HAL_PIXEL_FORMAT_RGBA_8888;
+        //If flexible yuv is used for sw read/write, need map to NV21
+        else if(format == HAL_PIXEL_FORMAT_YCbCr_420_888 &&
+            (usage & GRALLOC_USAGE_SW_WRITE_MASK ||
+            usage & GRALLOC_USAGE_SW_READ_MASK)) {
+            grallocFormat = HAL_PIXEL_FORMAT_YCrCb_420_SP;
+        }
     }
 
     getGrallocInformationFromFormat(grallocFormat, &bufferType);
@@ -380,4 +383,3 @@ int gpu_context_t::gralloc_close(struct hw_device_t *dev)
     }
     return 0;
 }
-

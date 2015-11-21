@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2010 The Android Open Source Project
- * Copyright (C) 2012-2013, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2012-2013, 2015, The Linux Foundation. All rights reserved.
  *
  * Not a Contribution.
  *
@@ -285,7 +285,6 @@ bool CopyBit::draw(hwc_context_t *ctx, hwc_display_contents_1_t *list,
         clear(renderBuffer, clearRegion);
     // numAppLayers-1, as we iterate from 0th layer index with HWC_COPYBIT flag
     for (int i = 0; i <= (ctx->listStats[dpy].numAppLayers-1); i++) {
-        hwc_layer_1_t *layer = &list->hwLayers[i];
         if(!(layerProp[i].mFlags & HWC_COPYBIT)) {
             ALOGD_IF(DEBUG_COPYBIT, "%s: Not Marked for copybit", __FUNCTION__);
             continue;
@@ -455,7 +454,7 @@ int  CopyBit::drawLayerUsingCopybit(hwc_context_t *dev, hwc_layer_1_t *layer,
             copybit_rect_t tmp_rect;
             tmp_dst.w = tmp_w;
             tmp_dst.h = tmp_h;
-            tmp_dst.format = tmpHnd->format;
+            tmp_dst.format = fbHandle->format;
             tmp_dst.handle = tmpHnd;
             tmp_dst.horiz_padding = src.horiz_padding;
             tmp_dst.vert_padding = src.vert_padding;

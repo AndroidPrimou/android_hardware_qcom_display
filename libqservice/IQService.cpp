@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2010 The Android Open Source Project
- * Copyright (C) 2012-2013, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2012-2013, 2015, The Linux Foundation. All rights reserved.
  *
  * Not a Contribution, Apache license notifications and license are
  * retained for attribution purposes only.
@@ -48,7 +48,7 @@ public:
         ALOGD_IF(QSERVICE_DEBUG, "%s: connect client", __FUNCTION__);
         Parcel data, reply;
         data.writeInterfaceToken(IQService::getInterfaceDescriptor());
-        data.writeStrongBinder(client->asBinder());
+        data.writeStrongBinder(IInterface::asBinder(client));
         remote()->transact(CONNECT, data, &reply);
     }
 
@@ -124,7 +124,7 @@ static void getProcName(int pid, char *buf, int size) {
     snprintf(buf, size, "/proc/%d/cmdline", pid);
     fd = open(buf, O_RDONLY);
     if (fd < 0) {
-        strcpy(buf, "Unknown");
+        strlcpy(buf, "Unknown", size);
     } else {
         int len = read(fd, buf, size - 1);
         buf[len] = 0;
